@@ -3,27 +3,12 @@ package com.ediptan01.santiyeustasi
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,6 +20,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
 
         setContent {
             SantiyeUstasi()
@@ -52,8 +38,10 @@ fun SantiyeUstasi() {
     MaterialTheme {
 
         Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = Color(0xFF101214)
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0xFF0D0F12)),
+            color = Color(0xFF0D0F12)
         ) {
 
             when (ekran) {
@@ -67,25 +55,25 @@ fun SantiyeUstasi() {
 
                 "sehir" -> Sehir(
                     para = para,
-                    geri = {
-                        ekran = "menu"
-                    },
                     santiye = {
                         ekran = "santiye"
+                    },
+                    geri = {
+                        ekran = "menu"
                     }
                 )
 
                 "santiye" -> Santiye(
                     para = para,
                     tamamlandi = gorevTamamlandi,
-                    geri = {
-                        ekran = "sehir"
-                    },
                     isiTamamla = {
                         if (!gorevTamamlandi) {
                             para += 35000
                             gorevTamamlandi = true
                         }
+                    },
+                    geri = {
+                        ekran = "sehir"
                     }
                 )
             }
@@ -102,6 +90,8 @@ fun AnaMenu(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .statusBarsPadding()
+            .navigationBarsPadding()
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -109,138 +99,220 @@ fun AnaMenu(
 
         Text(
             text = "ŞANTİYE USTASI",
-            color = Color(0xFFFFB300),
+            color = Color(0xFFFFB52E),
             fontSize = 36.sp,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.ExtraBold
         )
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Kendi inşaat şirketini kur.",
-            color = Color.LightGray,
+            text = "İnşa et • Kazan • Büyüt",
+            color = Color(0xFFB5B8BE),
             fontSize = 17.sp
         )
 
         Spacer(modifier = Modifier.height(35.dp))
 
         BilgiKutusu(
-            baslik = "Şirket Kasası",
-            deger = "$para TL"
+            baslik = "ŞİRKET KASASI",
+            deger = "%,d TL".format(para)
         )
 
-        Spacer(modifier = Modifier.height(30.dp))
+        Spacer(modifier = Modifier.height(25.dp))
 
-        Button(
-            onClick = oyunaBasla,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(60.dp),
-            shape = RoundedCornerShape(14.dp)
-        ) {
-            Text(
-                text = "OYUNA BAŞLA",
-                fontSize = 19.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
+        BuyukButon(
+            text = "OYUNA BAŞLA",
+            onClick = oyunaBasla
+        )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        Button(
-            onClick = {},
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("ŞİRKETİM")
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Button(
-            onClick = {},
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("ARAÇLARIM")
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Button(
-            onClick = {},
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("AYARLAR")
-        }
+        NormalButon("ŞİRKETİM")
+        NormalButon("ARAÇLARIM")
+        NormalButon("AYARLAR")
     }
 }
 
 @Composable
 fun Sehir(
     para: Int,
-    geri: () -> Unit,
-    santiye: () -> Unit
+    santiye: () -> Unit,
+    geri: () -> Unit
 ) {
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(18.dp)
+            .statusBarsPadding()
+            .navigationBarsPadding()
+            .padding(horizontal = 18.dp)
     ) {
+
+        Spacer(modifier = Modifier.height(10.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
 
-            Text(
-                text = "ŞEHİR",
-                color = Color.White,
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold
-            )
+            Column {
 
-            Text(
-                text = "$para TL",
-                color = Color(0xFFFFB300),
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
-            )
+                Text(
+                    text = "ŞEHİR",
+                    color = Color.White,
+                    fontSize = 30.sp,
+                    fontWeight = FontWeight.ExtraBold
+                )
+
+                Text(
+                    text = "Bugün yeni işler var",
+                    color = Color(0xFF92969D),
+                    fontSize = 14.sp
+                )
+            }
+
+            Card(
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color(0xFF20242A)
+                )
+            ) {
+
+                Text(
+                    text = "%,d TL".format(para),
+                    modifier = Modifier.padding(
+                        horizontal = 14.dp,
+                        vertical = 10.dp
+                    ),
+                    color = Color(0xFFFFB52E),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
+                )
+            }
         }
 
-        Spacer(modifier = Modifier.height(25.dp))
+        Spacer(modifier = Modifier.height(22.dp))
 
-        SehirKart(
-            baslik = "🏗️ ŞANTİYE",
-            aciklama = "Yeni bir inşaat işi var.",
+        MekanKart(
+            emoji = "🏗️",
+            baslik = "ŞANTİYE",
+            aciklama = "Yeni bir inşaat işi seni bekliyor.",
             buton = "ŞANTİYEYE GİT",
-            tikla = santiye
+            aktif = true,
+            onClick = santiye
         )
 
-        Spacer(modifier = Modifier.height(15.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
-        SehirKart(
-            baslik = "🔧 SANAYİ",
-            aciklama = "Araçlarını burada geliştirebilirsin.",
+        MekanKart(
+            emoji = "🔧",
+            baslik = "SANAYİ",
+            aciklama = "Araçlarını tamir et ve geliştir.",
             buton = "YAKINDA",
-            tikla = {}
+            aktif = false,
+            onClick = {}
         )
 
-        Spacer(modifier = Modifier.height(15.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
-        SehirKart(
-            baslik = "🏪 YAPI MARKET",
-            aciklama = "İnşaat malzemeleri satın al.",
+        MekanKart(
+            emoji = "🏪",
+            baslik = "YAPI MARKET",
+            aciklama = "İnşaat malzemelerini satın al.",
             buton = "YAKINDA",
-            tikla = {}
+            aktif = false,
+            onClick = {}
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        MekanKart(
+            emoji = "⛽",
+            baslik = "BENZİNLİK",
+            aciklama = "Araçlarının yakıtını doldur.",
+            buton = "YAKINDA",
+            aktif = false,
+            onClick = {}
         )
 
         Spacer(modifier = Modifier.weight(1f))
 
-        Button(
+        OutlinedButton(
             onClick = geri,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(54.dp),
+            shape = RoundedCornerShape(14.dp)
         ) {
             Text("ANA MENÜ")
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+    }
+}
+
+@Composable
+fun MekanKart(
+    emoji: String,
+    baslik: String,
+    aciklama: String,
+    buton: String,
+    aktif: Boolean,
+    onClick: () -> Unit
+) {
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFF191D22)
+        )
+    ) {
+
+        Column(
+            modifier = Modifier.padding(18.dp)
+        ) {
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                Text(
+                    text = emoji,
+                    fontSize = 30.sp
+                )
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Column {
+
+                    Text(
+                        text = baslik,
+                        color = Color.White,
+                        fontSize = 21.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    Text(
+                        text = aciklama,
+                        color = Color(0xFFA7ABB2),
+                        fontSize = 14.sp
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            Button(
+                onClick = onClick,
+                enabled = aktif,
+                modifier = Modifier.height(48.dp),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(buton)
+            }
         }
     }
 }
@@ -249,35 +321,36 @@ fun Sehir(
 fun Santiye(
     para: Int,
     tamamlandi: Boolean,
-    geri: () -> Unit,
-    isiTamamla: () -> Unit
+    isiTamamla: () -> Unit,
+    geri: () -> Unit
 ) {
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(20.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .statusBarsPadding()
+            .navigationBarsPadding()
+            .padding(20.dp)
     ) {
 
         Text(
-            text = "🏗️ ŞANTİYE",
-            color = Color(0xFFFFB300),
+            text = "ŞANTİYE",
+            color = Color(0xFFFFB52E),
             fontSize = 30.sp,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.ExtraBold
         )
 
-        Spacer(modifier = Modifier.height(25.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         BilgiKutusu(
-            baslik = "Aktif İş",
+            baslik = "AKTİF İŞ",
             deger = "80 m² Alçıpan Tavan"
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
         BilgiKutusu(
-            baslik = "İş Bedeli",
+            baslik = "İŞ BEDELİ",
             deger = "35.000 TL"
         )
 
@@ -285,29 +358,21 @@ fun Santiye(
 
         if (!tamamlandi) {
 
-            Button(
-                onClick = isiTamamla,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(60.dp)
-            ) {
-                Text(
-                    text = "İŞİ TAMAMLA",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+            BuyukButon(
+                text = "İŞİ TAMAMLA",
+                onClick = isiTamamla
+            )
 
         } else {
 
             Text(
                 text = "✓ İŞ TAMAMLANDI",
-                color = Color(0xFF66BB6A),
+                color = Color(0xFF62D477),
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold
             )
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             Text(
                 text = "35.000 TL kazandın!",
@@ -319,13 +384,13 @@ fun Santiye(
         Spacer(modifier = Modifier.weight(1f))
 
         Text(
-            text = "Kasa: $para TL",
-            color = Color.LightGray
+            text = "Kasa: %,d TL".format(para),
+            color = Color(0xFFB5B8BE)
         )
 
-        Spacer(modifier = Modifier.height(15.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
-        Button(
+        OutlinedButton(
             onClick = geri,
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -342,9 +407,9 @@ fun BilgiKutusu(
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(14.dp),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF1B1F23)
+            containerColor = Color(0xFF191D22)
         )
     ) {
 
@@ -354,8 +419,9 @@ fun BilgiKutusu(
 
             Text(
                 text = baslik,
-                color = Color.Gray,
-                fontSize = 14.sp
+                color = Color(0xFF8F949B),
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold
             )
 
             Spacer(modifier = Modifier.height(5.dp))
@@ -371,46 +437,38 @@ fun BilgiKutusu(
 }
 
 @Composable
-fun SehirKart(
-    baslik: String,
-    aciklama: String,
-    buton: String,
-    tikla: () -> Unit
+fun BuyukButon(
+    text: String,
+    onClick: () -> Unit
 ) {
 
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF1B1F23)
-        )
+    Button(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(58.dp),
+        shape = RoundedCornerShape(14.dp)
     ) {
-
-        Column(
-            modifier = Modifier.padding(18.dp)
-        ) {
-
-            Text(
-                text = baslik,
-                color = Color.White,
-                fontSize = 21.sp,
-                fontWeight = FontWeight.Bold
-            )
-
-            Spacer(modifier = Modifier.height(6.dp))
-
-            Text(
-                text = aciklama,
-                color = Color.LightGray
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Button(
-                onClick = tikla
-            ) {
-                Text(buton)
-            }
-        }
+        Text(
+            text = text,
+            fontSize = 17.sp,
+            fontWeight = FontWeight.Bold
+        )
     }
+}
+
+@Composable
+fun NormalButon(text: String) {
+
+    OutlinedButton(
+        onClick = {},
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(50.dp),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Text(text)
+    }
+
+    Spacer(modifier = Modifier.height(7.dp))
 }
