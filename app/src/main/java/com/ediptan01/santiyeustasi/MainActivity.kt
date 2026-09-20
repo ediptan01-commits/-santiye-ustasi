@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -11,10 +12,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlin.math.abs
 
 class MainActivity : ComponentActivity() {
 
@@ -33,29 +38,26 @@ fun SantiyeUstasi() {
 
     var ekran by remember { mutableStateOf("menu") }
     var para by remember { mutableStateOf(10000) }
-    var gorevTamamlandi by remember { mutableStateOf(false) }
 
     MaterialTheme {
 
         Surface(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color(0xFF0D0F12)),
-            color = Color(0xFF0D0F12)
+            modifier = Modifier.fillMaxSize(),
+            color = Color(0xFF101214)
         ) {
 
             when (ekran) {
 
                 "menu" -> AnaMenu(
                     para = para,
-                    oyunaBasla = {
+                    basla = {
                         ekran = "sehir"
                     }
                 )
 
-                "sehir" -> Sehir(
+                "sehir" -> SehirHaritasi(
                     para = para,
-                    santiye = {
+                    santiyeAc = {
                         ekran = "santiye"
                     },
                     geri = {
@@ -65,12 +67,8 @@ fun SantiyeUstasi() {
 
                 "santiye" -> Santiye(
                     para = para,
-                    tamamlandi = gorevTamamlandi,
-                    isiTamamla = {
-                        if (!gorevTamamlandi) {
-                            para += 35000
-                            gorevTamamlandi = true
-                        }
+                    tamamla = {
+                        para += 35000
                     },
                     geri = {
                         ekran = "sehir"
@@ -84,7 +82,7 @@ fun SantiyeUstasi() {
 @Composable
 fun AnaMenu(
     para: Int,
-    oyunaBasla: () -> Unit
+    basla: () -> Unit
 ) {
 
     Column(
@@ -100,7 +98,7 @@ fun AnaMenu(
         Text(
             text = "ŞANTİYE USTASI",
             color = Color(0xFFFFB52E),
-            fontSize = 36.sp,
+            fontSize = 38.sp,
             fontWeight = FontWeight.ExtraBold
         )
 
@@ -108,222 +106,486 @@ fun AnaMenu(
 
         Text(
             text = "İnşa et • Kazan • Büyüt",
-            color = Color(0xFFB5B8BE),
+            color = Color.LightGray,
             fontSize = 17.sp
         )
 
         Spacer(modifier = Modifier.height(35.dp))
 
-        BilgiKutusu(
-            baslik = "ŞİRKET KASASI",
-            deger = "%,d TL".format(para)
-        )
-
-        Spacer(modifier = Modifier.height(25.dp))
-
-        BuyukButon(
-            text = "OYUNA BAŞLA",
-            onClick = oyunaBasla
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        NormalButon("ŞİRKETİM")
-        NormalButon("ARAÇLARIM")
-        NormalButon("AYARLAR")
-    }
-}
-
-@Composable
-fun Sehir(
-    para: Int,
-    santiye: () -> Unit,
-    geri: () -> Unit
-) {
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .statusBarsPadding()
-            .navigationBarsPadding()
-            .padding(horizontal = 18.dp)
-    ) {
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        Row(
+        Card(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+            colors = CardDefaults.cardColors(
+                containerColor = Color(0xFF1C2025)
+            ),
+            shape = RoundedCornerShape(18.dp)
         ) {
 
-            Column {
-
-                Text(
-                    text = "ŞEHİR",
-                    color = Color.White,
-                    fontSize = 30.sp,
-                    fontWeight = FontWeight.ExtraBold
-                )
-
-                Text(
-                    text = "Bugün yeni işler var",
-                    color = Color(0xFF92969D),
-                    fontSize = 14.sp
-                )
-            }
-
-            Card(
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color(0xFF20242A)
-                )
+            Column(
+                modifier = Modifier.padding(20.dp)
             ) {
+
+                Text(
+                    text = "ŞİRKET KASASI",
+                    color = Color.Gray,
+                    fontSize = 13.sp
+                )
 
                 Text(
                     text = "%,d TL".format(para),
-                    modifier = Modifier.padding(
-                        horizontal = 14.dp,
-                        vertical = 10.dp
-                    ),
                     color = Color(0xFFFFB52E),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Bold
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(22.dp))
+        Spacer(modifier = Modifier.height(30.dp))
 
-        MekanKart(
-            emoji = "🏗️",
-            baslik = "ŞANTİYE",
-            aciklama = "Yeni bir inşaat işi seni bekliyor.",
-            buton = "ŞANTİYEYE GİT",
-            aktif = true,
-            onClick = santiye
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        MekanKart(
-            emoji = "🔧",
-            baslik = "SANAYİ",
-            aciklama = "Araçlarını tamir et ve geliştir.",
-            buton = "YAKINDA",
-            aktif = false,
-            onClick = {}
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        MekanKart(
-            emoji = "🏪",
-            baslik = "YAPI MARKET",
-            aciklama = "İnşaat malzemelerini satın al.",
-            buton = "YAKINDA",
-            aktif = false,
-            onClick = {}
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        MekanKart(
-            emoji = "⛽",
-            baslik = "BENZİNLİK",
-            aciklama = "Araçlarının yakıtını doldur.",
-            buton = "YAKINDA",
-            aktif = false,
-            onClick = {}
-        )
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        OutlinedButton(
-            onClick = geri,
+        Button(
+            onClick = basla,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(54.dp),
-            shape = RoundedCornerShape(14.dp)
+                .height(60.dp),
+            shape = RoundedCornerShape(16.dp)
         ) {
-            Text("ANA MENÜ")
-        }
 
-        Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "OYUNA BAŞLA",
+                fontSize = 19.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
     }
 }
 
 @Composable
-fun MekanKart(
-    emoji: String,
-    baslik: String,
-    aciklama: String,
-    buton: String,
-    aktif: Boolean,
-    onClick: () -> Unit
+fun SehirHaritasi(
+    para: Int,
+    santiyeAc: () -> Unit,
+    geri: () -> Unit
 ) {
 
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF191D22)
-        )
+    var carX by remember { mutableStateOf(0.50f) }
+    var carY by remember { mutableStateOf(0.72f) }
+
+    var mesaj by remember {
+        mutableStateOf("Şantiyeye git")
+    }
+
+    val santiyeX = 0.72f
+    val santiyeY = 0.28f
+
+    val santiyeYakin =
+        abs(carX - santiyeX) < 0.10f &&
+        abs(carY - santiyeY) < 0.10f
+
+    LaunchedEffect(santiyeYakin) {
+        if (santiyeYakin) {
+            mesaj = "Şantiyeye ulaştın!"
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFF75836B))
     ) {
 
-        Column(
-            modifier = Modifier.padding(18.dp)
+        Canvas(
+            modifier = Modifier.fillMaxSize()
+        ) {
+
+            val w = size.width
+            val h = size.height
+
+            /*
+             * ZEMİN
+             */
+
+            drawRect(
+                color = Color(0xFF75836B),
+                size = size
+            )
+
+            /*
+             * ANA YOLLAR
+             */
+
+            drawRect(
+                color = Color(0xFF30343A),
+                topLeft = Offset(0f, h * 0.42f),
+                size = Size(w, h * 0.18f)
+            )
+
+            drawRect(
+                color = Color(0xFF30343A),
+                topLeft = Offset(w * 0.42f, 0f),
+                size = Size(w * 0.18f, h)
+            )
+
+            /*
+             * YOL ÇİZGİLERİ
+             */
+
+            var x = 0f
+
+            while (x < w) {
+
+                drawRect(
+                    color = Color(0xFFFFD85A),
+                    topLeft = Offset(x, h * 0.505f),
+                    size = Size(45f, 6f)
+                )
+
+                x += 85f
+            }
+
+            var y = 0f
+
+            while (y < h) {
+
+                drawRect(
+                    color = Color(0xFFFFD85A),
+                    topLeft = Offset(w * 0.505f, y),
+                    size = Size(6f, 45f)
+                )
+
+                y += 85f
+            }
+
+            /*
+             * BİNALAR
+             */
+
+            bina(
+                this,
+                w * 0.08f,
+                h * 0.10f,
+                150f,
+                110f,
+                Color(0xFF9C9C9C)
+            )
+
+            bina(
+                this,
+                w * 0.08f,
+                h * 0.65f,
+                170f,
+                100f,
+                Color(0xFFB7A58A)
+            )
+
+            bina(
+                this,
+                w * 0.67f,
+                h * 0.08f,
+                150f,
+                110f,
+                Color(0xFF8B98A8)
+            )
+
+            bina(
+                this,
+                w * 0.68f,
+                h * 0.67f,
+                160f,
+                110f,
+                Color(0xFF9B8C7A)
+            )
+
+            /*
+             * SANAYİ
+             */
+
+            drawRect(
+                color = Color(0xFF52575B),
+                topLeft = Offset(w * 0.04f, h * 0.36f),
+                size = Size(w * 0.28f, h * 0.12f)
+            )
+
+            /*
+             * BENZİNLİK
+             */
+
+            drawRect(
+                color = Color(0xFFE7E7E7),
+                topLeft = Offset(w * 0.67f, h * 0.37f),
+                size = Size(130f, 80f)
+            )
+
+            drawRect(
+                color = Color(0xFFD73535),
+                topLeft = Offset(w * 0.67f, h * 0.37f),
+                size = Size(130f, 15f)
+            )
+
+            /*
+             * ŞANTİYE
+             */
+
+            val sx = w * santiyeX
+            val sy = h * santiyeY
+
+            drawRect(
+                color = Color(0xFFB78645),
+                topLeft = Offset(sx - 75f, sy - 55f),
+                size = Size(150f, 110f)
+            )
+
+            drawRect(
+                color = Color(0xFFE3C05B),
+                topLeft = Offset(sx - 60f, sy - 40f),
+                size = Size(120f, 80f),
+                style = Stroke(width = 5f)
+            )
+
+            /*
+             * ŞANTİYE UYARI ÇEMBERİ
+             */
+
+            drawCircle(
+                color = Color(0xFFFFB52E),
+                radius = 48f,
+                center = Offset(sx, sy),
+                style = Stroke(width = 5f)
+            )
+
+            /*
+             * ARAÇ
+             */
+
+            val cx = w * carX
+            val cy = h * carY
+
+            drawRoundRect(
+                color = Color(0xFFE0A52A),
+                topLeft = Offset(cx - 32f, cy - 20f),
+                size = Size(64f, 40f),
+                cornerRadius = androidx.compose.ui.geometry.CornerRadius(10f, 10f)
+            )
+
+            drawCircle(
+                color = Color.Black,
+                radius = 8f,
+                center = Offset(cx - 20f, cy + 20f)
+            )
+
+            drawCircle(
+                color = Color.Black,
+                radius = 8f,
+                center = Offset(cx + 20f, cy + 20f)
+            )
+
+            /*
+             * HEDEF ÇİZGİSİ
+             */
+
+            if (!santiyeYakin) {
+
+                drawLine(
+                    color = Color(0xFFFFC107),
+                    start = Offset(cx, cy),
+                    end = Offset(sx, sy),
+                    strokeWidth = 5f
+                )
+            }
+        }
+
+        /*
+         * ÜST BİLGİ
+         */
+
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .statusBarsPadding()
+                .padding(12.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = Color(0xE6202328)
+            ),
+            shape = RoundedCornerShape(16.dp)
         ) {
 
             Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(14.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-
-                Text(
-                    text = emoji,
-                    fontSize = 30.sp
-                )
-
-                Spacer(modifier = Modifier.width(12.dp))
 
                 Column {
 
                     Text(
-                        text = baslik,
+                        text = "ŞEHİR",
                         color = Color.White,
                         fontSize = 21.sp,
                         fontWeight = FontWeight.Bold
                     )
 
                     Text(
-                        text = aciklama,
-                        color = Color(0xFFA7ABB2),
-                        fontSize = 14.sp
+                        text = mesaj,
+                        color = Color(0xFFFFB52E),
+                        fontSize = 13.sp
                     )
+                }
+
+                Text(
+                    text = "%,d TL".format(para),
+                    color = Color(0xFFFFB52E),
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+
+        /*
+         * ŞANTİYE BUTONU
+         */
+
+        if (santiyeYakin) {
+
+            Button(
+                onClick = santiyeAc,
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 105.dp),
+                shape = RoundedCornerShape(14.dp)
+            ) {
+
+                Text("ŞANTİYEYE GİR")
+            }
+        }
+
+        /*
+         * YÖN KONTROLLERİ
+         */
+
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .navigationBarsPadding()
+                .padding(bottom = 18.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+
+            KontrolButonu("▲") {
+
+                carY = (carY - 0.05f).coerceAtLeast(0.08f)
+            }
+
+            Row {
+
+                KontrolButonu("◀") {
+
+                    carX = (carX - 0.05f).coerceAtLeast(0.05f)
+                }
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                KontrolButonu("●") {
+                    // Araç durur.
+                }
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                KontrolButonu("▶") {
+
+                    carX = (carX + 0.05f).coerceAtMost(0.95f)
                 }
             }
 
-            Spacer(modifier = Modifier.height(14.dp))
+            KontrolButonu("▼") {
 
-            Button(
-                onClick = onClick,
-                enabled = aktif,
-                modifier = Modifier.height(48.dp),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Text(buton)
+                carY = (carY + 0.05f).coerceAtMost(0.92f)
             }
         }
+
+        /*
+         * ANA MENÜ
+         */
+
+        OutlinedButton(
+            onClick = geri,
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .navigationBarsPadding()
+                .padding(12.dp),
+            colors = ButtonDefaults.outlinedButtonColors(
+                contentColor = Color.White
+            )
+        ) {
+            Text("MENÜ")
+        }
+    }
+}
+
+fun bina(
+    scope: androidx.compose.ui.graphics.drawscope.DrawScope,
+    x: Float,
+    y: Float,
+    width: Float,
+    height: Float,
+    color: Color
+) {
+
+    scope.drawRect(
+        color = color,
+        topLeft = Offset(x, y),
+        size = Size(width, height)
+    )
+
+    /*
+     * Pencereler
+     */
+
+    val pencere = Color(0xFFBFD5E3)
+
+    for (i in 0..2) {
+
+        for (j in 0..1) {
+
+            scope.drawRect(
+                color = pencere,
+                topLeft = Offset(
+                    x + 20f + i * 40f,
+                    y + 20f + j * 40f
+                ),
+                size = Size(20f, 22f)
+            )
+        }
+    }
+}
+
+@Composable
+fun KontrolButonu(
+    text: String,
+    onClick: () -> Unit
+) {
+
+    Button(
+        onClick = onClick,
+        modifier = Modifier.size(62.dp),
+        shape = RoundedCornerShape(14.dp),
+        contentPadding = PaddingValues(0.dp)
+    ) {
+
+        Text(
+            text = text,
+            fontSize = 23.sp,
+            fontWeight = FontWeight.Bold
+        )
     }
 }
 
 @Composable
 fun Santiye(
     para: Int,
-    tamamlandi: Boolean,
-    isiTamamla: () -> Unit,
+    tamamla: () -> Unit,
     geri: () -> Unit
 ) {
+
+    var tamamlandi by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -336,39 +598,66 @@ fun Santiye(
         Text(
             text = "ŞANTİYE",
             color = Color(0xFFFFB52E),
-            fontSize = 30.sp,
+            fontSize = 32.sp,
             fontWeight = FontWeight.ExtraBold
         )
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        BilgiKutusu(
-            baslik = "AKTİF İŞ",
-            deger = "80 m² Alçıpan Tavan"
-        )
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = Color(0xFF1C2025)
+            )
+        ) {
 
-        Spacer(modifier = Modifier.height(12.dp))
+            Column(
+                modifier = Modifier.padding(20.dp)
+            ) {
 
-        BilgiKutusu(
-            baslik = "İŞ BEDELİ",
-            deger = "35.000 TL"
-        )
+                Text(
+                    text = "80 m² ALÇIPAN TAVAN",
+                    color = Color.White,
+                    fontSize = 21.sp,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = "İş bedeli: 35.000 TL",
+                    color = Color.LightGray
+                )
+            }
+        }
 
         Spacer(modifier = Modifier.height(25.dp))
 
         if (!tamamlandi) {
 
-            BuyukButon(
-                text = "İŞİ TAMAMLA",
-                onClick = isiTamamla
-            )
+            Button(
+                onClick = {
+                    tamamlandi = true
+                    tamamla()
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(60.dp)
+            ) {
+
+                Text(
+                    text = "İŞİ TAMAMLA",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
 
         } else {
 
             Text(
                 text = "✓ İŞ TAMAMLANDI",
                 color = Color(0xFF62D477),
-                fontSize = 22.sp,
+                fontSize = 23.sp,
                 fontWeight = FontWeight.Bold
             )
 
@@ -385,7 +674,7 @@ fun Santiye(
 
         Text(
             text = "Kasa: %,d TL".format(para),
-            color = Color(0xFFB5B8BE)
+            color = Color.LightGray
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -394,81 +683,8 @@ fun Santiye(
             onClick = geri,
             modifier = Modifier.fillMaxWidth()
         ) {
+
             Text("ŞEHRE DÖN")
         }
     }
-}
-
-@Composable
-fun BilgiKutusu(
-    baslik: String,
-    deger: String
-) {
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF191D22)
-        )
-    ) {
-
-        Column(
-            modifier = Modifier.padding(18.dp)
-        ) {
-
-            Text(
-                text = baslik,
-                color = Color(0xFF8F949B),
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Bold
-            )
-
-            Spacer(modifier = Modifier.height(5.dp))
-
-            Text(
-                text = deger,
-                color = Color.White,
-                fontSize = 21.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
-    }
-}
-
-@Composable
-fun BuyukButon(
-    text: String,
-    onClick: () -> Unit
-) {
-
-    Button(
-        onClick = onClick,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(58.dp),
-        shape = RoundedCornerShape(14.dp)
-    ) {
-        Text(
-            text = text,
-            fontSize = 17.sp,
-            fontWeight = FontWeight.Bold
-        )
-    }
-}
-
-@Composable
-fun NormalButon(text: String) {
-
-    OutlinedButton(
-        onClick = {},
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(50.dp),
-        shape = RoundedCornerShape(12.dp)
-    ) {
-        Text(text)
-    }
-
-    Spacer(modifier = Modifier.height(7.dp))
 }
